@@ -1,93 +1,104 @@
+
 import streamlit as st
-import numpy as np
 import joblib
-import gdown
+import numpy as np
 
-
-url = "https://drive.google.com/uc?id=1ib7_s0Swzr-U0Cc7lr1dJ9f37ZDkD3gs"
-output = "fire_model.pkl"
-gdown.download(url, output, quiet=False)
-
-model = joblib.load("fire_model.pkl")
-scaler = joblib.load("scaler.pkl")
-
-
-st.set_page_config(page_title="🔥 Fire Type Classifier", layout="wide")
-
+st.set_page_config(page_title="Fire Type Predictor", layout="centered", page_icon="🔥")
 
 st.markdown("""
-    <style>
-    html, body, [class*="css"]  {
-        font-family: 'Segoe UI', sans-serif;
-    }
-    .stButton>button {
-        border-radius: 8px;
-        background-color: #FF4B4B;
-        color: white;
-        font-size: 16px;
-        height: 3em;
-        width: 100%;
-    }
-    .stButton>button:hover {
-        background-color: #D43F3F;
-        transition: 0.3s;
-    }
-    .result-box {
-        padding: 20px;
-        border-radius: 10px;
-        background-color: #262730;
-        color: white;
-        font-size: 20px;
-        text-align: center;
-        margin-top: 20px;
-    }
-    </style>
+<style>
+body {
+    background-color: #0f1117;
+    color: white;
+}
+.css-1aumxhk {
+    padding-top: 1rem;
+}
+h1, h2, h3 {
+    color: white;
+}
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+.stButton>button {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    color: white;
+    font-size: 18px;
+    border-radius: 12px;
+    padding: 0.75rem 2rem;
+    transition: 0.3s ease-in-out;
+    margin-top: 1rem;
+    width: 100%;
+}
+.stButton>button:hover {
+    transform: scale(1.05);
+}
+</style>
 """, unsafe_allow_html=True)
 
-# === App title ===
-st.markdown("<h1 style='text-align: center;'>🔥 Fire Type Classification App</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Predict fire types using MODIS satellite features and a machine learning model</p>", unsafe_allow_html=True)
-st.markdown("---")
 
-# === Input Form ===
+st.markdown("## 🔥 AI-Powered Fire Type Classifier")
+st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+
+model = joblib.load("best_fire_detection_model.pkl")
+scaler = joblib.load("scaler.pkl")
+
 with st.form("prediction_form"):
-    st.subheader("Enter Satellite Data:")
+    st.markdown("### 🛰️ Enter Satellite Data")
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        brightness = st.number_input("🔆 Brightness", value=300.0, step=1.0)
-        frp = st.number_input("🔥 Fire Radiative Power (FRP)", value=15.0, step=1.0)
-
+        brightness = st.number_input("🌞 Brightness", min_value=200.0, max_value=500.0, value=300.0)
     with col2:
-        bright_t31 = st.number_input("🌡️ Brightness T31", value=290.0, step=1.0)
-        scan = st.number_input("📏 Scan", value=1.0, step=0.1)
-
+        bright_t31 = st.number_input("🌡️ Brightness T31", min_value=200.0, max_value=500.0, value=290.0)
     with col3:
-        track = st.number_input("📍 Track", value=1.0, step=0.1)
-        confidence = st.selectbox("📶 Confidence Level", ["low", "nominal", "high"])
+        track = st.number_input("📍 Track", min_value=0.1, max_value=10.0, value=1.0)
+    
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        frp = st.number_input("🔥 Fire Radiative Power (FRP)", min_value=0.0, max_value=500.0, value=15.0)
+    with col5:
+        scan = st.number_input("🧪 Scan", min_value=0.1, max_value=10.0, value=1.0)
+    with col6:
+        confidence = st.selectbox("📊 Confidence Level", ["low", "nominal", "high"])
 
-    st.markdown("")
-    submit_button = st.form_submit_button("🚀 Predict Fire Type")
+    submit = st.form_submit_button("🚀 Predict Fire Type")
 
-# === Prediction Logic ===
-if submit_button:
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Prediction Logic
+if submit:
     confidence_map = {"low": 0, "nominal": 1, "high": 2}
     confidence_val = confidence_map[confidence]
 
-    # Scale and predict
-    input_data = np.array([[brightness, bright_t31, frp, scan, track, confidence_val]])
-    scaled_input = scaler.transform(input_data)
-    prediction = model.predict(scaled_input)[0]
+    input_data = np.array([[brightness, bright_t31, track, frp, scan, confidence_val]])
+    input_scaled = scaler.transform(input_data)
+    prediction = model.predict(input_scaled)[0]
 
+    # Fire type interpretation
     fire_types = {
-        0: "🌿 Vegetation Fire",
-        2: "🏜️ Other Static Land Source",
-        3: "🌊 Offshore Fire"
+        0: "Vegetation Fire",
+        2: "Other Static Land Source",
+        3: "Offshore Fire"
     }
 
-    result = fire_types.get(prediction, "❓ Unknown Type")
+    result = fire_types.get(prediction, "Unknown")
 
-    # === Result Display ===
-    st.markdown("<div class='result-box'>"
-                f"<strong>🔥 Predicted Fire Type:</strong><br>{result}"
-                "</div>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.subheader("🎯 Prediction Result")
+
+    if result == "Vegetation Fire":
+        st.success("🌲🔥 **Vegetation Fire Detected!** Take immediate action.")
+    elif result == "Other Static Land Source":
+        st.warning("🌆🔥 **Other Static Land Source Detected.** May not need urgent response.")
+    elif result == "Offshore Fire":
+        st.info("🌊🔥 **Offshore Fire Detected.** Monitor coastal areas.")
+    else:
+        st.error("⚠️ **Unknown Fire Type Detected.** Please verify inputs.")
