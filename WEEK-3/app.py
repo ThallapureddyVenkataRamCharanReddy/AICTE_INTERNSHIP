@@ -1,10 +1,15 @@
 import streamlit as st
 import numpy as np
 import joblib
+import gdown
 
 
-model = joblib.load("https://drive.google.com/file/d/1ib7_s0Swzr-U0Cc7lr1dJ9f37ZDkD3gs/view?usp=sharing")
-scaler = joblib.load("scaler(1).pkl")
+url = "https://drive.google.com/uc?id=1ib7_s0Swzr-U0Cc7lr1dJ9f37ZDkD3gs"
+output = "fire_model.pkl"
+gdown.download(url, output, quiet=False)
+
+model = joblib.load("fire_model.pkl")
+scaler = joblib.load("scaler.pkl")
 
 
 st.set_page_config(page_title="🔥 Fire Type Classifier", layout="wide")
