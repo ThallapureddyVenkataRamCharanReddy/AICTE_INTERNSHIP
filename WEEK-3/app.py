@@ -2,14 +2,14 @@ import streamlit as st
 import numpy as np
 import joblib
 
-# === Load model and scaler ===
+
 model = joblib.load(r"C:\Users\venka\Desktop\AICTE_INERNSHIP_1\best_fire_detection_model.pkl")
 scaler = joblib.load(r"C:\Users\venka\Desktop\AICTE_INERNSHIP_1\scaler.pkl")
 
-# === Page configuration ===
+
 st.set_page_config(page_title="🔥 Fire Type Classifier", layout="wide")
 
-# === Custom CSS ===
+
 st.markdown("""
     <style>
     html, body, [class*="css"]  {
