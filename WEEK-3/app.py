@@ -3,7 +3,7 @@ import numpy as np
 import joblib
 
 
-model = joblib.load(r"C:\Users\venka\Desktop\AICTE_INERNSHIP_1\best_fire_detection_model.pkl")
+model = joblib.load("https://drive.google.com/file/d/1ib7_s0Swzr-U0Cc7lr1dJ9f37ZDkD3gs/view?usp=sharing")
 scaler = joblib.load("scaler(1).pkl")
 
 
