@@ -44,7 +44,7 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 
-st.markdown("## 🔥 AI-Powered Fire Type Classifier")
+st.markdown("## 🔥 ML-Powered Fire Type Classifier")
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
 model = joblib.load("best_fire_detection_model.pkl")
